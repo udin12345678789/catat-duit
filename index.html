@@ -38,6 +38,11 @@ nav .fab{width:62px;height:62px;border-radius:22px;margin:-30px auto 0;backgroun
 #toast{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translate(-50%,-120px);background:#1b1f3b;color:#fff;padding:12px 18px;border-radius:16px;z-index:20;transition:.3s;max-width:90%;text-align:center}#toast.s{transform:translate(-50%,0)}
 .sk{height:90px;border-radius:22px;margin-bottom:14px;background:linear-gradient(90deg,#eef0ff,#f8f9ff,#eef0ff);background-size:200%;animation:sk 1.2s infinite}@keyframes sk{to{background-position:-200%}}
 .emp{text-align:center;padding:22px 10px;color:var(--mu)}.emp b{font-size:38px;display:block}
+.stk{position:relative;height:200px;margin:30px 0 40px;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+.sc{position:absolute;inset:0;border-radius:26px;padding:18px;color:#fff;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.2,.9,.25,1.1),opacity .4s;box-shadow:0 14px 30px #6d5dfc33;overflow:hidden}
+.sc.d{transition:none}.sc h2{color:#ffffffd9}.sc .mu{color:#ffffffd0}
+.dots{position:absolute;left:4px;bottom:-26px;display:flex;gap:5px}.dots i{width:7px;height:7px;border-radius:9px;background:#cfd3ee;transition:.3s}.dots i.on{width:22px;background:#6d5dfc}
+.stk small{position:absolute;right:4px;bottom:-28px;font-size:12px;color:var(--mu)}
 </style></head><body><main id="app"></main><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),rp=n=>(n<0?'-':'')+'Rp '+Math.round(Math.abs(n)).toLocaleString('id-ID'),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -62,9 +67,11 @@ const tg=Mm*S.nab/100,sv=tot(kb.filter(x=>x.category==='Tabungan')),pr=tg?Math.m
 const ac={};S.tx.forEach(x=>{const k=x.method||'Tanpa akun';ac[k]=(ac[k]||0)+(x.type==='masuk'?x.amount:-x.amount)});
 return `<h1>Halo 👋</h1>${chips()}<div class="c hero"><div class="mu">Saldo bersih</div><div class="big">${rp(M-K)}</div><div class="g2" style="margin-top:12px"><div class="mini"><div class="mu">Pemasukan</div><b>${rp(M)}</b></div><div class="mini"><div class="mu">Pengeluaran</div><b>${rp(K)}</b></div></div></div>
 <div class="c"><h2>Insight</h2>${M||K?`<p>🔥 Terbesar: <b>${top?esc(top[0])+' · '+rp(top[1]):'—'}</b></p><p>📅 Rata-rata keluar/hari: <b>${rp(K/r.n)}</b></p><p>${chg==null?'🆕 Belum ada pembanding periode sebelumnya':`${chg>0?'📈':'📉'} Pengeluaran <b class="${chg>0?'out':'in'}">${chg>0?'naik':'turun'} ${Math.abs(chg).toFixed(0)}%</b> dibanding periode sebelumnya (${rp(pk)})`}</p>`:EMP}</div>
-<div class="c"><h2>Batas aman harian</h2><div class="big">${rp(aman)}</div><div class="mu">Sisa pemasukan − pengeluaran bulan ini, dibagi ${left} hari tersisa.</div></div>
-<div class="c"><h2>Target nabung ${S.nab}%</h2><div class="row sp"><b>${rp(sv)}</b><span class="mu">dari ${rp(tg)}</span></div><div class="bar" style="margin:8px 0"><i style="width:${pr}%"></i></div><div class="mu">Otomatis dari kategori "Tabungan" bulan ini. Atur % di Setelan.</div></div>
-<div class="c"><h2>Arus per akun</h2>${Object.entries(ac).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="row sp" style="padding:6px 0"><span>${esc(k)}</span><b class="${v<0?'out':'in'}">${rp(v)}</b></div>`).join('')||'<div class="mu">Belum ada data.</div>'}<div class="mu" style="margin-top:6px">Pemasukan − pengeluaran tiap akun, sejak awal data.</div></div>`}
+<div class="stk" id="stk">
+<div class="sc" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)"><h2>Batas aman harian</h2><div class="big">${rp(aman)}</div><div class="mu">Sisa pemasukan − pengeluaran bulan ini, dibagi ${left} hari tersisa.</div></div>
+<div class="sc" style="background:linear-gradient(135deg,#06b6d4,#10b981)"><h2>Target nabung ${S.nab}%</h2><div class="row sp"><b>${rp(sv)}</b><span class="mu">dari ${rp(tg)}</span></div><div class="bar" style="margin:10px 0;background:#ffffff40"><i style="width:${pr}%;background:#fff"></i></div><div class="mu">Otomatis dari kategori "Tabungan" bulan ini.</div></div>
+<div class="sc" style="background:linear-gradient(135deg,#a78bfa,#ec4899)"><h2>Arus per akun</h2>${Object.entries(ac).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`<div class="row sp" style="padding:4px 0"><span>${esc(k)}</span><b>${rp(v)}</b></div>`).join('')||'<div class="mu">Belum ada data.</div>'}</div>
+<div class="dots"><i></i><i></i><i></i></div><small>geser atau ketuk</small></div>`}
 function chart(){const r=rng(),ke=pick('keluar',r.a,r.b),K=tot(ke),M=tot(pick('masuk',r.a,r.b)),bc=bycat(ke);let g=0;const cs=bc.map(([,v],i)=>{const s=g;g+=v/K*100;return `${COL[i%8]} ${s}% ${g}%`}).join(',');
 const m={};ke.forEach(x=>{const k=r.n>31?x.date.slice(0,7):x.date;m[k]=(m[k]||0)+x.amount});const ks=Object.keys(m).sort(),mx=Math.max(...ks.map(k=>m[k]),1),mb=Math.max(M,K,1);
 return chips()+(M||K?`<div class="c"><h2>Pengeluaran per kategori</h2>${K?`<div class="row"><div class="donut" style="background:conic-gradient(${cs})"><u>Total<br><b style="color:var(--tx)">${rp(K)}</b></u></div><div style="flex:1;min-width:0">${bc.slice(0,6).map(([k,v],i)=>`<div class="row sp" style="font-size:13px;padding:3px 0"><span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${COL[i%8]}"></i> ${esc(k)}</span><b>${Math.round(v/K*100)}%</b></div>`).join('')}</div></div>`:'<div class="mu">Tidak ada pengeluaran.</div>'}</div>
@@ -77,7 +84,7 @@ function hist(){const cs=[...new Set([...S.cats.masuk,...S.cats.keluar,...S.tx.m
 function set(){return `<h1>Setelan</h1><div class="c"><label>Target nabung (% dari pemasukan bulan ini)</label><input type="number" min="0" max="100" value="${S.nab}" onchange="S.nab=Math.min(100,Math.max(0,+this.value||0));localStorage.nab=S.nab;toast('Target nabung disimpan')"><label>URL Apps Script</label><input id="u" value="${esc(cfg.url)}"><label>Kunci rahasia</label><input id="k" type="password" value="${esc(cfg.key)}"><button class="btn" style="margin-top:14px" onclick="conn()">Simpan & muat ulang</button></div>`}
 function conn(){const u=$('#u').value.trim(),k=$('#k').value.trim();if(!/^https:\/\/script\.google\.com\//.test(u)||!k)return toast('Isi URL Apps Script dan kunci dengan benar',0);cfg={url:u,key:k};localStorage.cfg=JSON.stringify(cfg);load()}
 function draw(){const a=$('#app');let n=$('nav');if(!cfg){a.innerHTML=`<h1 style="margin-top:40px">💸 Catat Duit</h1><p class="mu" style="margin-bottom:16px">Sambungkan ke spreadsheet-mu (sekali saja).</p><div class="c"><label>URL Apps Script (berakhiran /exec)</label><input id="u"><label>Kunci rahasia</label><input id="k" type="password"><button class="btn" style="margin-top:14px" onclick="conn()">Sambungkan</button></div>`;n&&n.remove();return}
-a.innerHTML=S.load&&!S.tx.length?'<div class="sk"></div>'.repeat(4):({home,chart,hist,set})[S.tab]();
+a.innerHTML=S.load&&!S.tx.length?'<div class="sk"></div>'.repeat(4):({home,chart,hist,set})[S.tab]();bindStack();
 if(!n){n=document.createElement('nav');document.body.append(n)}
 n.innerHTML=[['home','🏠','Ringkasan'],['chart','📊','Grafik'],0,['hist','🧾','Riwayat'],['set','⚙️','Setelan']].map(t=>t?`<button class="${S.tab===t[0]?'on':''}" onclick="S.tab='${t[0]}';draw();scrollTo(0,0)"><b>${t[1]}</b>${t[2]}</button>`:`<button class="fab" onclick="sheet('keluar')" aria-label="Tambah Transaksi">+</button>`).join('')}
 function sheet(ty,i){const e=i==null?null:S.tx[i],t=new Date();F={type:ty,e,cat:e?e.category:''};const o=document.createElement('div');o.className='ov';o.id='ov';o.onclick=ev=>{if(ev.target===o)o.remove()};
@@ -90,5 +97,12 @@ if(!(am>0))return toast('Nominal wajib diisi dan lebih dari 0',0);if(!tx.categor
 const b=$('#sv'),ed=!!F.e;b.disabled=1;b.textContent='Menyimpan…';
 try{await api(ed?{action:'update',type:F.type,row:F.e.row,orig:F.e,tx}:{action:'add',type:F.type,tx});$('#ov').remove();toast(ed?'Perubahan tersimpan':'Tersimpan ke spreadsheet');await load()}catch(e){toast('Gagal menyimpan: '+e.message,0);b.disabled=0;b.textContent='Simpan'}}
 async function del(){if(!confirm('Hapus transaksi ini dari spreadsheet?'))return;try{await api({action:'delete',type:F.type,row:F.e.row,orig:F.e});$('#ov').remove();toast('Transaksi dihapus');await load()}catch(e){toast('Gagal menghapus: '+e.message,0)}}
+S.k=0;
+function lay(){const cs=[...document.querySelectorAll('.sc')];cs.forEach((c,i)=>{const o=(i-S.k+cs.length)%cs.length;c.style.zIndex=9-o;c.style.opacity=1-o*.18;c.style.transform=`translateY(${-13*o}px) scale(${1-o*.05})`});document.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on',i===S.k))}
+function bindStack(){const st=$('#stk');if(!st)return;const cs=[...st.querySelectorAll('.sc')],n=cs.length;lay();let x0=null,dx=0;
+const go=dir=>{const f=cs[S.k];S.k=(S.k+1)%n;lay();f.style.zIndex=20;f.style.opacity=0;f.style.transform=`translateX(${dir*130}%) rotate(${dir*18}deg)`;setTimeout(()=>{f.classList.add('d');lay();f.offsetWidth;f.classList.remove('d')},320)};
+st.onpointerdown=e=>{x0=e.clientX;dx=0;cs[S.k].classList.add('d');st.setPointerCapture(e.pointerId)};
+st.onpointermove=e=>{if(x0==null)return;dx=e.clientX-x0;cs[S.k].style.transform=`translateX(${dx}px) rotate(${dx/16}deg)`};
+st.onpointerup=st.onpointercancel=()=>{if(x0==null)return;cs[S.k].classList.remove('d');const a=Math.abs(dx);x0=null;if(a>70||a<6)go(dx>0&&a>=6?1:-1);else lay()}}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');draw();if(cfg)load();
 </script></body></html>
